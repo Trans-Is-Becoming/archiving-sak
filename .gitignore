@@ -1,0 +1,7 @@
+.idea
+asak/handlers/__pycache__/
+asak/__pycache__/
+*.db
+*.url
+*.warc
+*.log
