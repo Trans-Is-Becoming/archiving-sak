@@ -52,6 +52,7 @@ def getArgs(handles):
     parser.add_argument('--filename', help='filename to archive to')
     parser.add_argument('--log', help='filename to write log files to')
     parser.add_argument('--filename-clip', help='limit on length of filename', default=100)
+    parser.add_argument('--hash-clip', help='limit on length of hash in filename', default=8)
     parser.add_argument('urls', help='url to archive', nargs="+")
 
     return parser.parse_args()
