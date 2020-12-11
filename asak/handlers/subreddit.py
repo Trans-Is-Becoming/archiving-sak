@@ -6,7 +6,8 @@ from base import BaseHandler
 class Subreddit(BaseHandler):
     handles = ["reddit"]
     def __init__(self):
-        pass
+        self.name = "redditPostArchiver"
+        self.logger = logging.getLogger(self.name)
 
     def handle(self, url, args, handle):
         logging.info("Archiving "+url)

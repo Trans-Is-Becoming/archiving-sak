@@ -18,8 +18,25 @@ def getHandles(handlers):
         modes.extend(handler.handles)
     return modes
 
-def parseRequestedHandlers(macro, use):
-    return ["wayback"]
+
+def getMacros():
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read('macros.ini')
+    macros = {str(key):
+                  [str(k) for k in config[key].keys()]
+              for key in config.keys() if not str(key) == "DEFAULT"}
+    return macros
+
+
+def parseRequestedHandlers(macros, use):
+    handlers = []
+    for macro in macros:
+        if not macro == "auto":
+            handlers.extend(getMacros()[macro])
+    if use:
+        handlers.extend(use)
+    handlers = list(set(handlers)) # remove duplicates
+    return handlers
 
 
 def getArgs(handles):
@@ -39,17 +56,23 @@ def getArgs(handles):
 
     return parser.parse_args()
 
+
+def initLogging(logFileName, debug):
+    level = logging.DEBUG if debug else logging.INFO
+    logFile = logFileName+".sak.log" if logFileName else None
+    formatStr = '[%(name)s][%(levelname)8s]\t %(message)s'
+    logging.basicConfig(filename=logFile, level=level, format=formatStr)
+    return logging.getLogger("asak")
+
+
 handlers = getHandlers()
 handles = getHandles(handlers)
-
 args = getArgs(handles)
-requestedHandlers = parseRequestedHandlers(args.macro, args.use)
-urls = args.urls
+urls, logFileName, debug = args.urls, args.log, args.debug
+macro, use = args.macro, args.use
 
-level = logging.DEBUG if args.debug else logging.INFO
-logFile = args.log+".sak.log" if args.log else None
-formatStr = '[%(name)s][%(levelname)8s]\t %(message)s'
-logging.basicConfig(filename=logFile, level=level, format=formatStr)
+logger = initLogging(logFileName, debug)
+requestedHandlers = parseRequestedHandlers(macro, use)
 
 
 for url in urls:
