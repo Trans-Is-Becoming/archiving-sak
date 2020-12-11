@@ -1,49 +1,61 @@
 #!/usr/bin/env python3
-import sys, argparse, logging
+import argparse, logging, glob, importlib
+import configparser
+from pathlib import Path
+
+def getHandlers():
+    handlerFiles = glob.glob("./handlers/*.py")
+    handlerModules = []
+    for file in handlerFiles:
+        moduleName = Path(file).stem
+        handlerModules.append(importlib.import_module("handlers."+moduleName).exportedClass)
+    return handlerModules
 
 
+def getHandles(handlers):
+    modes = ["auto"]
+    for handler in handlers:
+        modes.extend(handler.handles)
+    return modes
 
-modes=["auto", "video", "subreddit", "webpage", "website"]
-parser = argparse.ArgumentParser(description='Archives digital content.')
+def parseRequestedHandlers(macro, use):
+    return ["wayback"]
 
-parser.add_argument('mode', help='mode ({})'.format(modes))
-parser.add_argument('--upload', action="store_true", help='upload to archive.org')
-parser.add_argument('--debug', action="store_true", help='enable debug logging')
-parser.add_argument('--url-hash', action="store_true", help='upload to archive.org')
-parser.add_argument('--filename', help='filename to archive to')
-parser.add_argument('--log', help='filename to write log files to')
-parser.add_argument('--filename-clip', help='limit on length of filename', default=100)
-parser.add_argument('urls', nargs='+', help='url to archive')
 
-args = parser.parse_args()
-mode = args.mode
+def getArgs(handles):
+    parser = argparse.ArgumentParser(description='Archives digital content.')
+
+    parser.add_argument('macro', help='a set of handlers to use (set this with TODO)'.format(handles),
+                        nargs="+", default="auto")
+    parser.add_argument('--use', help='what handlers to use'.format(handles), nargs="+",
+                        choices=handles)
+    parser.add_argument('--upload', action="store_true", help='upload to archive.org')
+    parser.add_argument('--debug', action="store_true", help='enable debug logging')
+    parser.add_argument('--url-hash', action="store_true", help='upload to archive.org')
+    parser.add_argument('--filename', help='filename to archive to')
+    parser.add_argument('--log', help='filename to write log files to')
+    parser.add_argument('--filename-clip', help='limit on length of filename', default=100)
+    parser.add_argument('urls', help='url to archive', nargs="+")
+
+    return parser.parse_args()
+
+handlers = getHandlers()
+handles = getHandles(handlers)
+
+args = getArgs(handles)
+requestedHandlers = parseRequestedHandlers(args.macro, args.use)
 urls = args.urls
 
 level = logging.DEBUG if args.debug else logging.INFO
-logging.basicConfig(level=level)
+logFile = args.log+".sak.log" if args.log else None
 formatStr = '[%(name)s][%(levelname)8s]\t %(message)s'
-formatter = logging.Formatter(formatStr)
-timeFormatter = logging.Formatter('[%(asctime)s]'+formatStr)
-ch = logging.StreamHandler()
-ch.setLevel(level)
-ch.setFormatter(formatter)
+logging.basicConfig(filename=logFile, level=level, format=formatStr)
 
-if args.log:
-    fh = logging.FileHandler(args.log+".sak.log")
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(timeFormatter)
 
 for url in urls:
-    l = logging.getLogger(url[0:100])
-    l.propagate = False
-    l.addHandler(ch)
-    if args.log:
-        l.addHandler(fh)
-    if mode == "webpage":
-        from handlers.webpage import Webpage
-        Webpage().handle(url, args)
-    if mode == "subreddit":
-        from handlers.subreddit import Subreddit
-        Subreddit().handle(url, args)
+    for handler in handlers:
+        for requestedHandle in requestedHandlers:
+            if requestedHandle in handler.handles:
+                handler().handle(url, args)
 
 

@@ -4,6 +4,7 @@ sys.path.append("..")
 from base import BaseHandler
 
 class Webpage(BaseHandler):
+    handles = ["wayback"]
     def __init__(self):
         pass
 
@@ -43,3 +44,5 @@ class Webpage(BaseHandler):
             f.write(url)
             if args.upload:
                 f.write("\n" + archivedUrl)
+
+exportedClass = Webpage
