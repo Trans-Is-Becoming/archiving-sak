@@ -2,17 +2,21 @@
 import sys, argparse, logging
 
 sys.path.append("..")
-from base import BaseHandler
+from utils import BaseHandler
 
 
 class Wayback(BaseHandler):
     handles = ["wayback"]
+    name = "wayback"
 
     def __init__(self):
-        self.name = "wayback"
         self.logger = logging.getLogger(self.name)
 
-    def handle(self, url, args):
+    @staticmethod
+    def add_arguments(parser):
+        return parser
+
+    def handle(self, url, args, handle):
         try:
             from archivenow.handlers import warc_handler
             from archivenow.handlers import ia_handler
