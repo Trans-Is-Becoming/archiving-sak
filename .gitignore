@@ -5,3 +5,4 @@ asak/__pycache__/
 *.url
 *.warc
 *.log
+test/
