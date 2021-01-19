@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import sys, logging, os
+
 sys.path.append("..")
 from utils import BaseHandler
+
 
 class Subreddit(BaseHandler):
     handles = ["reddit"]
@@ -15,7 +17,8 @@ class Subreddit(BaseHandler):
         return parser
 
     def handle(self, url, args, handle):
-        logging.info("Archiving "+url)
-        os.system("/home/gwynu/Documents/tibi/redditPostArchiver/subreddit.py ExcavatorSkills")
+        logging.info("Archiving " + url)
+        os.system(f"/home/gwynu/Documents/tibi/redditPostArchiver/subreddit.py {url}")
+
 
 exportedClass = Subreddit
