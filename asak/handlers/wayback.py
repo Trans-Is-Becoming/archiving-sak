@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import sys, argparse, logging
 
-sys.path.append("..")
-from utils import BaseHandler
+from .utils import BaseHandler
 
 
 class Wayback(BaseHandler):

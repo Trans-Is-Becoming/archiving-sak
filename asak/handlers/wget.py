@@ -4,7 +4,7 @@ from shutil import which
 import subprocess
 
 sys.path.append("..")
-import utils
+from . import utils
 
 
 class WGet(utils.BaseHandler):

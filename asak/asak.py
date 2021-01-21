@@ -7,6 +7,10 @@ from hyperlink import URL
 
 def getHandlers():
     handlerFiles = glob.glob("./handlers/*.py")
+    try:
+        handlerFiles.remove("./handlers/utils.py")
+    except ValueError:
+        pass
     handlerModules = []
     for file in handlerFiles:
         moduleName = Path(file).stem
